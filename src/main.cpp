@@ -1,3 +1,4 @@
+/*
 #include <chrono>
 #include <thread>
 #include <fmt/format.h>
@@ -14,8 +15,17 @@ int main() {
 
     while (true) {
         using namespace std::chrono_literals;
-        std::this_thread::sleep_for(1s);
         double x = xSub.Get();
         fmt::print("X: {}\n", x);
     }
+}
+*/
+
+#include "MyApp.h"
+
+int main() {
+  MyApp app;
+  app.Run();
+
+  return 0;
 }
