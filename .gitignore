@@ -15,6 +15,7 @@ CMakeUserPresets.json
 SDK/
 build/
 cmake-build-debug/
+.DS_Store
 
 # CLion
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

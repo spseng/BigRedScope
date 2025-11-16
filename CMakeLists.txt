@@ -55,8 +55,31 @@ target_link_libraries(MyApp
 
 # ====== macOS rpath for WPILib when building on macOS ======
 if(APPLE)
+    # Frameworksディレクトリを作成
+    add_custom_command(TARGET MyApp POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+            "$<TARGET_FILE_DIR:MyApp>/../Frameworks"
+    )
+
+    # Ultralightのdylibをアプリバンドルにコピー
+    set(UL_DYLIBS
+            "${UL_SDK_PATH}/bin/libUltralight.dylib"
+            "${UL_SDK_PATH}/bin/libUltralightCore.dylib"
+            "${UL_SDK_PATH}/bin/libWebCore.dylib"
+            "${UL_SDK_PATH}/bin/libAppCore.dylib"
+    )
+
+    foreach(dylib ${UL_DYLIBS})
+        add_custom_command(TARGET MyApp POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${dylib}"
+                "$<TARGET_FILE_DIR:MyApp>/../Frameworks/"
+        )
+    endforeach()
+
+    # rpathを更新
     set_target_properties(MyApp PROPERTIES
-        BUILD_RPATH "$ENV{HOME}/wpilib/2025/cpp/osx"
-        INSTALL_RPATH "$ENV{HOME}/wpilib/2025/cpp/osx"
+            BUILD_RPATH "@executable_path/../Frameworks;$ENV{HOME}/wpilib/2025/cpp/osx"
+            INSTALL_RPATH "@executable_path/../Frameworks;$ENV{HOME}/wpilib/2025/cpp/osx"
     )
 endif()
