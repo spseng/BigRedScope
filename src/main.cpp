@@ -20,7 +20,6 @@ int main() {
     }
 }
 */
-
 #include "MyApp.h"
 
 int main() {

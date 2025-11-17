@@ -28,7 +28,9 @@ set(SHOULD_EMBED_FILES FALSE)
 
 set(SOURCE_FILES "src/MyApp.h"
                  "src/MyApp.cpp"
-                 "src/main.cpp")
+                 "src/main.cpp"
+                "src/NetworkHandler.h"
+                "src/NetworkHandler.cpp")
 
 if (SHOULD_EMBED_FILES)
 	set(SOURCE_FILES ${SOURCE_FILES}
@@ -45,12 +47,14 @@ target_include_directories(MyApp PRIVATE
         ${WPILIB_ROOT}/include/ntcore
         ${WPILIB_ROOT}/include/wpinet
         ${WPILIB_ROOT}/include/wpiutil
+        ${WPILIB_ROOT}/include/wpimath
 )
 
 target_link_libraries(MyApp
     ntcore
     wpinet
     wpiutil
+    wpimath
 )
 
 # ====== macOS rpath for WPILib when building on macOS ======

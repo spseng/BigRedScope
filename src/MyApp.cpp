@@ -1,11 +1,19 @@
 #include "MyApp.h"
-#include <Ultralight/platform/Platform.h>
 #include <string>
 #include <iostream>
 
 #if defined(UL_EMBED_FILES)
-#include "platform/EmbeddedFileSystem.h"
 #endif
+
+#include <Ultralight/platform/Platform.h>
+#include "platform/EmbeddedFileSystem.h"
+#include <chrono>
+#include <thread>
+#include <fmt/format.h>
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTable.h>
+#include <networktables/DoubleTopic.h>
+#include <frc/geometry/Pose2d.h>
 
 #define WINDOW_WIDTH  600
 #define WINDOW_HEIGHT 400
@@ -36,7 +44,9 @@ MyApp::MyApp() {
   ///
   /// Force a call to OnResize to perform size/layout of our overlay.
   ///
-  OnResize(window_.get(), window_->width(), window_->height());
+  // Avoid calling the virtual OnResize inside the constructor; resize the
+  // overlay directly instead.
+  overlay_->Resize(window_->width(), window_->height());
 
   ///
   /// Load a page into our overlay's View
@@ -68,9 +78,6 @@ MyApp::MyApp() {
   overlay_->view()->set_view_listener(this);
 }
 
-MyApp::~MyApp() {
-}
-
 void MyApp::Run() {
   app_->Run();
 }
@@ -82,14 +89,18 @@ void MyApp::OnUpdate() {
   /// You should update any app logic here.
   ///
 
-    static int counter = 0;
-    counter++;
 
-    std::string js_code = "updateCounter(" + std::to_string(counter) + ");";
+  double time = handler_.getDouble("deltaT");
 
-    overlay_->view()->EvaluateScript(js_code.c_str());
+  frc::Pose2d pose_ = handler_.getPose2d("robotPose");
 
-    std::cout << "OnUpdate called: counter = " << counter << std::endl;
+  count += time;
+
+  std::string js_code = "updateCounter(" + std::to_string(pose_.X().value()) + ");";
+
+  overlay_->view()->EvaluateScript(js_code.c_str());
+
+  std::cout << "OnUpdate called: counter = " << pose_.X().value() << std::endl;
 }
 
 void MyApp::OnClose(ultralight::Window* window) {
@@ -123,6 +134,11 @@ void MyApp::OnDOMReady(ultralight::View* caller,
   ///
   /// This is the best time to setup any JavaScript bindings.
   ///
+  handler_ = NetworkHandler("127.0.0.1");
+
+  handler_.addDoubleSubscriber("deltaT", "drivetrain", "DeltaTime");
+
+  handler_.addPose2dArraySubscriber("robotPoses", "drivetrain", "CurrentPose");
 }
 
 void MyApp::OnChangeCursor(ultralight::View* caller,
