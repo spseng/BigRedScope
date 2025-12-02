@@ -1,19 +1,78 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>MyApp -- (edit this title in app.html)</title>
-    <style>
+<head>
+  <title>Robot Dashboard</title>
+  <style>
     body {
-      font-family: -apple-system, 'Segoe UI Light', Ubuntu, Arial, sans-serif;
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-    </style>
-  </head>
-  <body>
-    <h1>not aaaa</h1>
-    <div id="counter">0</div>
-    <script>
-      function updateCounter(val) {
-        document.getElementById('counter').innerText = val;
-      }
-    </script>
-  </body>
+    .data-display {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+<h1>Robot Dashboard</h1>
+<div class="data-display">
+  Pose X: <span id="pose-x">0.00</span> m
+</div>
+<div class="data-display">
+  Pose Y: <span id="pose-y">0.00</span> m
+</div>
+<div class="data-display">
+  Rotation: <span id="pose-rotation">0.00</span>°
+</div>
+<div class="data-display">
+  Delta Time: <span id="delta-time">0.00</span> s
+</div>
+
+<script>
+  // イベントリスナーを登録（重要！）
+  window.addEventListener('robotDataUpdate', () => {
+    // window.robotData からデータを取得
+    const data = window.robotData;
+
+    if (!data) {
+      console.warn('No robot data available');
+      return;
+    }
+
+    // UIを更新
+    document.getElementById('pose-x').textContent = data.pose.x.toFixed(2);
+    document.getElementById('pose-y').textContent = data.pose.y.toFixed(2);
+    document.getElementById('pose-rotation').textContent = data.pose.rotation.toFixed(2);
+    document.getElementById('delta-time').textContent = data.deltaTime.toFixed(3);
+
+    // 配列データの処理
+    if (data.poses && data.poses.length > 0) {
+      console.log(`Received ${data.poses.length} poses`);
+      data.poses.forEach((pose, i) => {
+        console.log(`Pose ${i}: x=${pose.x}, y=${pose.y}`);
+      });
+    }
+
+    // ここで Canvas描画やその他の処理も可能
+    renderRobotPosition(data);
+  });
+
+  // 初期化時に呼ばれる（オプション）
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('Dashboard initialized');
+  });
+
+  function renderRobotPosition(data) {
+    // Canvas や SVG で描画する場合
+    // 例: drawRobotOnCanvas(data.pose.x, data.pose.y, data.pose.rotation);
+  }
+
+  // デバッグ用: データが来ているか確認
+  setInterval(() => {
+    if (window.robotData) {
+      console.log('Latest data:', window.robotData);
+    }
+  }, 1000);
+</script>
+</body>
 </html>

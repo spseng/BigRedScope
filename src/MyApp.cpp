@@ -92,15 +92,33 @@ void MyApp::OnUpdate() {
 
   double time = handler_.getDouble("deltaT");
 
-  frc::Pose2d pose_ = handler_.getPose2d("robotPose");
+  frc::Pose2d pose = handler_.getPose2d("robotPose");
 
   count += time;
 
-  std::string js_code = "updateCounter(" + std::to_string(pose_.X().value()) + ");";
+  std::string js_code = "updateCounter(" + std::to_string(time) + ");";
 
-  overlay_->view()->EvaluateScript(js_code.c_str());
+  std::cout << "OnUpdate called: counter = " << pose.X().value() << std::endl;
 
-  std::cout << "OnUpdate called: counter = " << pose_.X().value() << std::endl;
+    std::string json = fmt::format(
+            R"({{
+            "deltaTime": {},
+            "pose": {{"x": {}, "y": {}, "rotation": {}}}
+        }})",
+            count,
+            pose.X().value(),
+            pose.Y().value(),
+            pose.Rotation().Degrees().value()
+    );
+
+
+    std::string script = fmt::format(
+            "window.robotData = {}; "
+            "window.dispatchEvent(new CustomEvent('robotDataUpdate'));",
+            json
+    );
+
+    overlay_->view()->EvaluateScript(script.c_str());
 }
 
 void MyApp::OnClose(ultralight::Window* window) {
